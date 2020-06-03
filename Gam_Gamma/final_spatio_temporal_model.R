@@ -44,6 +44,54 @@ mod.scale.st <- gam(list(obs~s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon),
                     family=gammals, select=TRUE)
 save(mod.scale.st, file="mod.scale.st.year.months.Rdata")
 
+##### save the shape and scale of the Gamma (as parametrised in R)
+scale.gamma.mat <- shape.gamma.mat <- NULL
+
+for(yy in 1:length(unique(dates_sel$year))){
+  print(yy)
+  dat2pred          <- data.frame("lat"=rep(sites_DE_sel$lat,12),
+                                  "lon"=rep(sites_DE_sel$lon,12),
+                                  "elev"=rep(sites_DE_sel$elevation,12),
+                                  "month"=rep(1:12, each=nrow(sites_DE_sel)),
+                                  "year"=rep(unique(dates_sel$year)[yy], 12*nrow(sites_DE_sel)))
+  gamma_pred    <- predict(mod.scale.st, dat2pred, type = "response")
+  gamma_shape   <- exp(gamma_pred[,2])
+  gamma_mean    <- gamma_pred[,1]
+  scale.gamma.mat       <- rbind(scale.gamma.mat, matrix(gamma_mean*gamma_shape, byrow=TRUE, ncol=length(sites_DE_sel$lon)))
+  shape.gamma.mat       <- rbind(shape.gamma.mat, matrix(1/gamma_shape, byrow=TRUE, ncol=length(sites_DE_sel$lon)))
+}
+
+dates_mat <- cbind(rep(unique(dates_sel$year), each=12), rep(1:12, length(unique(dates_sel$year)))) 
+
+fct.merge.scale <- function(ss){
+  dates_fitted_scale <- data.frame("year"=dates_mat[,1],
+                                   "month"=dates_mat[,2],
+                                   "scale"=scale.gamma.mat[,ss])
+  merge.try <- merge.data.frame(dates_sel, dates_fitted_scale, all.x=TRUE, 
+                                by = intersect(names(dates_sel), names(dates_fitted_scale)))
+  return(merge.try$scale)
+}
+
+fct.merge.shape <- function(ss){
+  dates_fitted_shape <- data.frame("year"=dates_mat[,1],
+                                   "month"=dates_mat[,2],
+                                   "shape"=shape.gamma.mat[,ss])
+  merge.try <- merge.data.frame(dates_sel, dates_fitted_shape, all.x=TRUE, 
+                                by = intersect(names(dates_sel), names(dates_fitted_shape)))
+  return(merge.try$shape)
+}
+
+#####
+fitted.scale.mat.list <- lapply(1:ncol(data_sel), fct.merge.scale) 
+fitted.scale.mat      <- do.call(cbind,fitted.scale.mat.list)
+
+fitted.shape.mat.list <- lapply(1:ncol(data_sel), fct.merge.shape) 
+fitted.shape.mat      <- do.call(cbind,fitted.shape.mat.list)
+
+fitted.gamma.param <- list("scale"=fitted.scale.mat,
+                           "shape"=fitted.shape.mat)
+save(fitted.gamma.param, file="data/fitted.gamma.param.Rdata")
+
 ###fitted spatio-temporal (with years and months) model with fixed shape
 load("/Users/worklinda/Desktop/HEC_Montreal/Postdoc/Daniela_Thomas_precipitation/Thomas/mod.scale.st.year.months.Rdata")
 ####### January vs August
