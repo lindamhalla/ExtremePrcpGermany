@@ -61,6 +61,10 @@ fitted.pr.obs.mat      <- do.call(cbind,fitted.pr.obs.mat.list)
 fitted.pr.obs.sd.mat.list <- lapply(1:ncol(data_sel), fct.merge.pr.obs.sd) 
 fitted.pr.obs.sd.mat      <- do.call(cbind,fitted.pr.obs.sd.mat.list)
 
+fitted.pr.obs <- list("fitted.pr.obs.mat"=fitted.pr.obs.mat,
+                      "fitted.pr.obs.sd.mat"=fitted.pr.obs.sd.mat)
+save(fitted.pr.obs, file="data/fitted.pr.obs.Rdata")
+
 ##### Plots of the prob of positive precip on January 2000
 which.idx <- which((dates_sel$year==2000)&(dates_sel$month==1))[1]
 
