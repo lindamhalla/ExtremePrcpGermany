@@ -172,7 +172,7 @@ pdf("year_month_effect_pr_exc.pdf", width = 7, height = 5)
 par(mar=c(3,3.2,1.5,0.5),mgp=c(1.6,0.5,0),font.main=1.3,cex=1.3,cex.main=1)
 
 col2use <- plasma(12)
-plot(year2pred, yeffect[,1], type="l", ylab="Estimated prob_0", xlab="Time", col=col2use[1], 
+plot(year2pred, yeffect[,1], type="l", ylab="Estimated prob_exc", xlab="Time", col=col2use[1], 
      ylim=c(range(yeffect)[1],range(yeffect)[2]))
 text(x=year2pred[2],y=yeffect[2,1], labels = as.character(1), cex=0.6)
 for(mm in 2:12){
