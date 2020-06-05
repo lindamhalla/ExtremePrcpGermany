@@ -11,14 +11,15 @@ dat.obs.binom <- data.frame("obs"=as.numeric(obs.gamma>0),
 library(mgcv)
 library(parallel)
 
-cl <- makeCluster(detectCores()-2)
-m_obs_binomial <- bam(obs~s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon),
+cl <- makeCluster(detectCores()-1)
+m_obs_binomial <- bam(obs~s(year)+s(month, bs="cc", k=12)+s(elev)+te(lat,lon),
                   family="binomial", data=dat.obs.binom, select=TRUE,
                   cluster=cl)
 stopCluster(cl)
 
 save(m_obs_binomial, file="data/m_obs_binomial.Rdata")
 
+### save fitted probabilities in a matrix
 pr.obs.full.mat <- pr.obs.sd.full.mat <- NULL
 
 for(yy in 1:length(unique(dates_sel$year))){
