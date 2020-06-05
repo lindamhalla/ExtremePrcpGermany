@@ -22,8 +22,8 @@ dat.exc.binom <- data.frame("exc"=as.numeric(exc.gamma>0),
 library(mgcv)
 library(parallel)
 
-cl <- makeCluster(detectCores()-2)
-m_binomial <- bam(exc~s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon),
+cl <- makeCluster(detectCores()-1)
+m_binomial <- bam(exc~s(year)+s(month, bs="cc", k=12)+s(elev)+te(lat,lon),
                   family="binomial", data=dat.exc.binom, select=TRUE,
                   cluster=cl)
 stopCluster(cl)
@@ -160,7 +160,7 @@ dev.off()
 
 library("viridis")
 
-year2pred <- seq(min(dat.obs.binom$year),max(dat.obs.binom$year),length.out = 100)
+year2pred <- seq(min(dat.exc.binom$year),max(dat.exc.binom$year),length.out = 100)
 yeffect   <- yeffect.sd <- NULL
 for(mm in 1:12){
   bla     <- predict(m_binomial, type="response", newdata=data.frame("month"=mm,
