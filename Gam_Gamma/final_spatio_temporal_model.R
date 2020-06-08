@@ -38,7 +38,7 @@ site2keep <- spatial.sample$id
 ##################################################################################################################################
 
 ## spatio-temporal model with year and months
-mod.scale.st <- gam(list(obs~s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon),
+mod.scale.st <- gam(list(obs~s(year)+s(month, bs="cc", k=12)+s(elev)+te(lat,lon),
                          ~1), data = dat,
                     subset= which(dat$site %in% site2keep),
                     family=gammals, select=TRUE)
