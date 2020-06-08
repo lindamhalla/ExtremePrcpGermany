@@ -28,8 +28,8 @@ library(evgam)
 dat.exc.gamma_gpd <- dat.exc.gamma.subsample.exc
 dat.exc.gamma_gpd$exc[dat.exc.gamma_gpd$exc <= 0] <- NA
 
-fmla_gpd           <- list(exc ~ s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon), 
-                           ~ s(year)+s(month, bs="cc", k=12)+s(elev)+s(lat,lon))
+fmla_gpd           <- list(exc ~ s(year)+s(month, bs="cc", k=12)+s(elev)+te(lat,lon), 
+                           ~ s(year)+s(month, bs="cc", k=12)+s(elev)+te(lat,lon))
 m_gpd_full_sub_exc <- evgam(fmla_gpd, dat.exc.gamma_gpd, family = "gpd")
 
 save(m_gpd_full_sub_exc, file="data/m_gpd_full_ss_sub_exc.Rdata")
