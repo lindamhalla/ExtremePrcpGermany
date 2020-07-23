@@ -20,8 +20,6 @@ anom.training.positive <- data_sel
 for(i in 1:ncol(anom.training.positive)){
   anom.training.positive[(anom.training.positive[,i] == 0)|(anom.training.positive[,i] >= fitted.quant.mat[,i]),i] <- NA
 }
-# anom.training.positive[(anom.training.positive == 0)|(anom.training.positive >= fitted.quant.mat)] <- NA
-# anom.training.positive <- anom.training.positive[!is.na(anom.training.positive)]
 
 #gam with latitude and longitude in both the location and scale
 dat   <- data.frame("obs"=as.vector(anom.training.positive)/as.vector(fitted.quant.mat),
@@ -32,10 +30,6 @@ dat   <- data.frame("obs"=as.vector(anom.training.positive)/as.vector(fitted.qua
                     "month"=rep(dates_sel$month, ncol(anom.training.positive)),
                     "year"=rep(dates_sel$year, ncol(anom.training.positive)))
 
-# # Keep one site out of 40: selection made randomly
-# set.seed(22)
-# site2keep        <- sample(1:ncol(anom.training.positive), round(ncol(anom.training.positive)/40))
-# 
 #"homogeneous" subsampling from the map
 load("data/SpatialSample.Rdata")
 site2keep <- spatial.sample$id
@@ -64,7 +58,6 @@ save(mod.beta.st, file="data/mod.beta.st.year.months.Rdata")
 fitted.shape1.mat <- fitted.shape2.mat <- NULL
 
 for(s in 1:nrow(sites_DE_sel)){
-  print(s)
   beta_mean <- predict(mod.beta.st, type="response", newdata = data.frame("lat"=rep(sites_DE_sel$lat[s],nrow(dates_sel)),
                                                                           "lon"=rep(sites_DE_sel$lon[s],nrow(dates_sel)),
                                                                           "elev"=rep(sites_DE_sel$elevation[s],nrow(dates_sel)),
@@ -125,11 +118,8 @@ gg_january <- gg_january+ theme(legend.position = "none")
 gg_august <- gg_august+ theme(legend.position = "bottom")
 
 library(gridExtra)
-png("spatial_year_month_beta_median.png", width = 12, height = 5,units = 'in', res = 200)
 
 grid.arrange(gg_january,gg_august, nrow=1,ncol=2)
-
-dev.off()
 
 ##########################
 ##### Plot of the yearly and monthly effects
@@ -151,17 +141,12 @@ for(mm in 1:12){
   for(j in year2pred){
     quant.site <- c(quant.site, 
                     unique(fitted.quant.mat[which((dates_sel$month==mm)&(dates_sel$year ==j)),22])[1])
-    #print(c(j,unique(fitted.quant.mat[which((dates_sel$month==mm)&(dates_sel$year ==j)),22])))
+    # print(c(j,unique(fitted.quant.mat[which((dates_sel$month==mm)&(dates_sel$year ==j)),22])))
   }
-  
-  # yeffect <- cbind(yeffect, qbeta(0.5, shape1=fitted.shape1, shape2=fitted.shape2)*
-  #                    unique(fitted.quant.mat[which((dates_sel$month==mm)&(dates_sel$year %in% year2pred)),22]))
+
   yeffect <- cbind(yeffect, qbeta(0.5, shape1=fitted.shape1, shape2=fitted.shape2)*
                      quant.site)
 }
-
-pdf("year_month_effect_median_beta.pdf", width = 7, height = 5)
-par(mar=c(3,3.2,1.5,0.5),mgp=c(1.6,0.5,0),font.main=1.3,cex=1.3,cex.main=1)
 
 col2use <- plasma(12)
 plot(year2pred, yeffect[,1], type="l", ylab="Estimated median", xlab="Time", col=col2use[1], 
@@ -171,5 +156,3 @@ for(mm in 2:12){
   lines(year2pred, yeffect[,mm], col=col2use[mm])
   text(x=year2pred[2],y=yeffect[2,mm], labels = as.character(mm), cex=0.6)
 }
-
-dev.off()
